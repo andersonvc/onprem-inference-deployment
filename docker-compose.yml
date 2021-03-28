@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+  api-service:
+    build: 
+      context: ./api-service
+      dockerfile: Dockerfile
+    container_name: api-service
+    ports:
+      - 80:80
+
+  dcgm_exporter:
+    image: nvidia/dcgm-exporter:2.1.4
+    container_name: dcgm_exporter
+    runtime: nvidia
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./deployment/configs/dcgm_exporter:/etc/dcgm-exporter
+    ports:
+      - 9400:9400
+
+  prometheus:
+    image: "prom/prometheus:v2.25.2"
+    container_name: prometheus
+    depends_on:
+      - torchserve
+    command:
+      - "--config.file=/prometheus/config/prometheus.yml"
+    volumes:
+      - ./deployment/configs/prometheus:/prometheus/config
+    ports:
+      - 9090:9090
+
+  grafana:
+    image: "grafana/grafana:7.5.1"
+    container_name: grafana
+    depends_on:
+      - prometheus
+    environment:
+      - GF_PATHS_CONFIG=/usr/share/grafana/config/grafana.ini
+      - GF_PATHS_PROVISIONING=/usr/share/grafana/config/provisioning
+    volumes:
+      - ./deployment/configs/grafana:/usr/share/grafana/config:ro
+      - grafana-data:/var/lib/grafana:rw
+    ports:
+      - 3000:3000
+
+  torchserve:
+    image: pytorch/torchserve:1.0
+    container_name: torchserve
+    command:
+      - "torchserve --start --model-store /home/model-server/model-store --models all"
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+      - 7070:7070
+      - 7071:7071
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: [gpu]
+    volumes:
+      - torchdata-model-store:/home/model-server/model-store:rw
+      - torchdata-examples:/home/model-server/examples:rw
+volumes:
+  torchdata-model-store:
+    external: true
+  torchdata-examples:
+    external: true
+  grafana-data:
+    external: true

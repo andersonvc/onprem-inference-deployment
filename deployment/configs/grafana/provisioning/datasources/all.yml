@@ -1,0 +1,7 @@
+datasources:
+  - name: 'Prometheus'
+    type: 'prometheus'
+    access: 'server'
+    url: http://192.168.1.109:9090
+    is_default: true
+    editable: true

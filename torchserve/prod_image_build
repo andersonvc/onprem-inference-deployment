@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd builder
+./build_image.sh -g -cv cu101 -t pytorch/torchserve:1.0
