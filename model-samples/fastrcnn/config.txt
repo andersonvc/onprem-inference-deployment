@@ -1,0 +1,7 @@
+MODEL_NAME="fastrcnn"
+SERIALIZED_FILE="./fasterrcnn_resnet50_fpn_coco-258fb6c6.pth"
+MODEL_FILE="./model.py"
+HANDLER="object_detector"
+EXTRA_FILES="./index_to_name.json"
+RUNTIME="python3"
+VERSION="1.0"

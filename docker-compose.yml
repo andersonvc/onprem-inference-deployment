@@ -5,6 +5,8 @@ services:
       context: ./api-service
       dockerfile: Dockerfile
     container_name: api-service
+    volumes:
+      - torchdata-model-store:/torchdata-model-store:rw
     ports:
       - 80:80
 
