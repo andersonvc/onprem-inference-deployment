@@ -22,6 +22,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
 
+
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
@@ -37,7 +38,7 @@ WORKDIR /app
 
 ENV PYTHONPATH=/app
 
-EXPOSE 80
+EXPOSE 8055
 
 CMD ["/start.sh"]
 

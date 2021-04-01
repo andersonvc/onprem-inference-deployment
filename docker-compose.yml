@@ -1,14 +1,29 @@
 version: "3.9"
 services:
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./deployment/configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ~/.certbot/config/live/anderson.vc/fullchain.pem:/letsencrypt/fullchain.pem
+      - ~/.certbot/config/live/anderson.vc/privkey.pem:/letsencrypt/privkey.pem
+      - ~/.certbot/config/live/anderson.vc/chain.pem:/letsencrypt/chain.pem
+
   api-service:
     build: 
       context: ./api-service
       dockerfile: Dockerfile
     container_name: api-service
+    restart: unless-stopped
     volumes:
       - torchdata-model-store:/torchdata-model-store:rw
     ports:
-      - 80:80
+      - 8055:8055
 
   dcgm_exporter:
     image: nvidia/dcgm-exporter:2.1.4
@@ -33,6 +48,8 @@ services:
       - ./deployment/configs/prometheus:/prometheus/config
     ports:
       - 9090:9090
+    logging:
+      driver: none
 
   grafana:
     image: "grafana/grafana:7.5.1"
@@ -47,6 +64,8 @@ services:
       - grafana-data:/var/lib/grafana:rw
     ports:
       - 3000:3000
+    logging:
+      driver: none
 
   torchserve:
     image: pytorch/torchserve:1.0
@@ -67,6 +86,9 @@ services:
     volumes:
       - torchdata-model-store:/home/model-server/model-store:rw
       - torchdata-examples:/home/model-server/examples:rw
+    logging:
+      driver: none
+
 volumes:
   torchdata-model-store:
     external: true
